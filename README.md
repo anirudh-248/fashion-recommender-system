@@ -1,0 +1,2 @@
+# Fashion Recommender System
+This is a Deep Learning based Fashion Recommender System built using ResNet50. The images used in this system are fetched from the [Fashion Product Images (Small)](https://www.kaggle.com/datasets/paramaggarwal/fashion-product-images-small) dataset.
