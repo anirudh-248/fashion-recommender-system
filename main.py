@@ -15,6 +15,7 @@ from io import BytesIO
 
 feature_list = np.array(pickle.load(open('embeddings.pkl', 'rb')))
 filenames = pickle.load(open('filenames.pkl', 'rb'))
+csv_data = pd.read_csv('data.csv')
 
 model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
 model.trainable = False
@@ -24,14 +25,10 @@ model = tensorflow.keras.Sequential([
     GlobalMaxPooling2D()
 ])
 
-# Load CSV file
-csv_data = pd.read_csv('data.csv')
-
 st.title('Fashion Recommender System')
 
 def save_uploaded_file(uploaded_file):
     try:
-        # Ensure the uploads directory exists
         if not os.path.exists('uploads'):
             os.makedirs('uploads')
         with open(os.path.join('uploads', uploaded_file.name), 'wb') as f:
@@ -65,15 +62,12 @@ def feature_extraction(img_path, model):
     preprocessed_img = preprocess_input(expanded_img_array)
     result = model.predict(preprocessed_img).flatten()
     normalized_result = result / norm(result)
-
     return normalized_result
 
 def recommend(features, feature_list):
     neighbors = NearestNeighbors(n_neighbors=6, algorithm='brute', metric='euclidean')
     neighbors.fit(feature_list)
-
     distances, indices = neighbors.kneighbors([features])
-
     return indices
 
 ids = []
@@ -82,14 +76,10 @@ ids = []
 uploaded_file = st.file_uploader("Choose an image")
 if uploaded_file is not None:
     if save_uploaded_file(uploaded_file):
-        # Display the uploaded file
         display_image = Image.open(uploaded_file)
         st.image(display_image)
-        # Feature extraction
         features = feature_extraction(os.path.join("uploads", uploaded_file.name), model)
-        # Recommendation
         indices = recommend(features, feature_list)
-        # Show recommendations
         cols = st.columns(5)
         for i in range(5):
             with cols[i]:
@@ -97,28 +87,23 @@ if uploaded_file is not None:
                 st.subheader(f"{i+1}.")
                 st.image(filenames[indices[0][i + 1]])
                 st.text(f"Name: {filename}")
-
-                # Get ID from CSV
                 file_id = csv_data.loc[csv_data['filename'] == filename, 'id'].values
                 ids.append(file_id[0])
                 if len(file_id) > 0:
                     st.text(f"ID: {file_id[0]}")
                 else:
                     st.text("ID: Not found")
+
+# URL input
 else:
-    # URL input
     url = st.text_input("Or enter the URL of an image")
     if url:
         img_path = save_url_image(url)
         if img_path:
-            # Display the downloaded image
             display_image = Image.open(img_path)
             st.image(display_image)
-            # Feature extraction
             features = feature_extraction(img_path, model)
-            # Recommendation
             indices = recommend(features, feature_list)
-            # Show recommendations
             cols = st.columns(5)
             for i in range(5):
                 with cols[i]:
@@ -126,8 +111,6 @@ else:
                     st.subheader(f"{i+1}.")
                     st.image(filenames[indices[0][i + 1]])
                     st.text(f"Name: {filename}")
-
-                    # Get ID from CSV
                     file_id = csv_data.loc[csv_data['filename'] == filename, 'id'].values
                     ids.append(file_id[0])
                     if len(file_id) > 0:
@@ -135,4 +118,8 @@ else:
                     else:
                         st.text("ID: Not found")
 
-print(ids)
+if ids:
+    print(ids)
+    url = ""
+    requests.post(url, json={"ids": ids})
+    

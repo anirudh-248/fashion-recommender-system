@@ -1,7 +1,4 @@
 .vscode
 env
-images
 images_demo
 uploads
-*.pkl
-*.csv
