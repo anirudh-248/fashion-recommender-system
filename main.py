@@ -4,6 +4,7 @@ from PIL import Image
 import numpy as np
 import pickle
 import tensorflow
+import pandas as pd
 from tensorflow.keras.preprocessing import image # type: ignore
 from tensorflow.keras.layers import GlobalMaxPooling2D # type: ignore
 from tensorflow.keras.applications.resnet50 import ResNet50, preprocess_input # type: ignore
@@ -22,6 +23,9 @@ model = tensorflow.keras.Sequential([
     model,
     GlobalMaxPooling2D()
 ])
+
+# Load CSV file
+csv_data = pd.read_csv('data.csv')
 
 st.title('Fashion Recommender System')
 
@@ -72,6 +76,8 @@ def recommend(features, feature_list):
 
     return indices
 
+ids = []
+
 # File upload
 uploaded_file = st.file_uploader("Choose an image")
 if uploaded_file is not None:
@@ -87,8 +93,18 @@ if uploaded_file is not None:
         cols = st.columns(5)
         for i in range(5):
             with cols[i]:
-                st.subheader(i+1)
+                filename = os.path.basename(filenames[indices[0][i + 1]])
+                st.subheader(f"{i+1}.")
                 st.image(filenames[indices[0][i + 1]])
+                st.text(f"Name: {filename}")
+
+                # Get ID from CSV
+                file_id = csv_data.loc[csv_data['filename'] == filename, 'id'].values
+                ids.append(file_id[0])
+                if len(file_id) > 0:
+                    st.text(f"ID: {file_id[0]}")
+                else:
+                    st.text("ID: Not found")
 else:
     # URL input
     url = st.text_input("Or enter the URL of an image")
@@ -106,5 +122,17 @@ else:
             cols = st.columns(5)
             for i in range(5):
                 with cols[i]:
-                    st.subheader(i+1)
+                    filename = os.path.basename(filenames[indices[0][i + 1]])
+                    st.subheader(f"{i+1}.")
                     st.image(filenames[indices[0][i + 1]])
+                    st.text(f"Name: {filename}")
+
+                    # Get ID from CSV
+                    file_id = csv_data.loc[csv_data['filename'] == filename, 'id'].values
+                    ids.append(file_id[0])
+                    if len(file_id) > 0:
+                        st.text(f"ID: {file_id[0]}")
+                    else:
+                        st.text("ID: Not found")
+
+print(ids)
