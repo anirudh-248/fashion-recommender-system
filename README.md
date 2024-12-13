@@ -1,2 +1,2 @@
 # Fashion Recommender System
-This is a Deep learning-based Fashion Recommendation System built using ResNet50.
+The Fashion Recommender System is a machine learning-powered tool built with Streamlit that provides fashion recommendations based on a user's uploaded image. It uses a ResNet50 model to extract features from the uploaded image, which are then compared against a database of precomputed embeddings using a nearest neighbors algorithm. The system suggests similar fashion items, displaying their images and additional details like names and IDs. Users can either upload an image directly or provide an image URL. The tool also integrates with an external system to send item IDs for further processing.
