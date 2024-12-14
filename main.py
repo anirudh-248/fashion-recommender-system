@@ -120,6 +120,6 @@ else:
 
 if ids:
     print(ids)
-    url = ""
+    url = "https://cozywear.free.beeceptor.com"
     requests.post(url, json={"ids": ids})
     
